@@ -9,9 +9,16 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@prisma/client": "^3.12.0",
+    "cookies-next": "^2.0.4",
+    "i": "^0.3.7",
     "next": "12.1.4",
+    "npm": "^8.6.0",
+    "pretty-ms": "^7.0.1",
     "react": "18.0.0",
-    "react-dom": "18.0.0"
+    "react-dom": "18.0.0",
+    "socket.io": "^4.4.1",
+    "socket.io-client": "^4.4.1"
   },
   "devDependencies": {
     "@types/node": "17.0.23",

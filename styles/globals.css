@@ -2,6 +2,7 @@ html,
 body {
   padding: 0;
   margin: 0;
+  background-color: #dddddd;
   font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
     Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
 }
@@ -13,4 +14,115 @@ a {
 
 * {
   box-sizing: border-box;
+}
+
+.canvas {
+  image-rendering: -moz-crisp-edges;
+  image-rendering: -webkit-crisp-edges;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  z-index: -1;
+  margin: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.border { 
+  border-style: solid;
+  box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  border: 5px solid rgb(0, 0, 0);
+}
+
+
+.color {
+  transition: transform .2s; /* balls */
+  width: 40px;
+  height: 40px;
+  z-index: 1;
+  overflow: hidden;
+}
+.color:hover {
+  transform: scale(1.5);
+}
+
+.colorpalette {
+  position: absolute;
+  left: calc(100% - 60px);
+  top: 25%;
+}
+
+.colorcube {
+  position:absolute;
+  left:0;
+  top:0;
+  width:10px;
+  height:10px;
+  background-color: aqua;
+  pointer-events: none;
+  -webkit-box-shadow: 0px 0px 20px 0px rgba(66, 68, 90, 1);
+  -moz-box-shadow: 0px 0px 20px 0px rgba(66, 68, 90, 1);
+  box-shadow: 0px 0px 20px 0px rgba(66, 68, 90, 1);
+
+}
+
+.Loginbutton {
+  z-index: 5;
+  position: absolute;
+  left: calc(100% - 150px);
+  bottom: calc(100% - 70px);
+  padding: 20px 50px;
+}
+
+.Loginmodal {
+  display: block;
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 5;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.4);
+  overflow: auto;
+}
+
+.Center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+}
+
+.TextInput { 
+  padding: 2% 10%;
+}
+
+.Loginmodal-content {
+  margin: 0;
+  position: absolute;
+  background-color: #dddddd;
+  z-index: 10;
+  /*
+  padding: 20px 0px;
+  width: 50%;
+  height: 50%;
+  */
+  /* -webkit-box-shadow: 0px 0px 20px 0px rgba(66, 68, 90, 1);
+  -moz-box-shadow: 0px 0px 20px 0px rgba(66, 68, 90, 1);
+  box-shadow: 0px 0px 20px 0px rgba(66, 68, 90, 1); */
+}
+
+.cooldown {
+  position: fixed;
+  background: #c04000;
+  left: 50%;
+  bottom: 20px;
+  padding: 20px 20px;
+  border-radius: 10px;
+  transform: translate(-50%, -50%);
+  margin: 0 auto;
+  z-index: 10;
 }
