@@ -4,7 +4,7 @@ import Image from 'next/image'
 import { useEffect, useRef, useState } from 'react'
 import styles from '../styles/Home.module.css'
 import Colorpalette from './colorpalette'
-import io, { Socket } from 'Socket.io-client'
+import io, { Socket } from 'socket.io-client'
 import { DefaultEventsMap } from '@socket.io/component-emitter'
 import Colorcube from './colorcube'
 import { ParsedUrlQuery } from 'querystring'
@@ -12,7 +12,6 @@ import { getCookie } from 'cookies-next'
 import Loginbutton from './loginbutton'
 import LoginModal from './LoginModal'
 import prettyMilliseconds from 'pretty-ms'
-
 
 const xSize = 100
 const ySize = 100
