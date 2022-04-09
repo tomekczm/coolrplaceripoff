@@ -54,6 +54,7 @@ const Home = (props: Props) => {
   const canvasRef = useRef(null)
   const [color, setColor] = useState(0)
   const [cooldown, setCooldown] = useState(0)
+  const [showFollowingDot, setShowFollowingDot] = useState(true)
   const loggedIn = props.isLoggedIn
 
   function updateTimer(endTime: number) {
@@ -62,6 +63,7 @@ const Home = (props: Props) => {
     const withoutMs = timeLeft - (timeLeft % 1000)    
     if(timeLeft < 0) {
       setCooldown(0)
+      setShowFollowingDot(true)
     }else {
       setCooldown(withoutMs)
       setTimeout(() => updateTimer(endTime), 1000)
@@ -129,13 +131,16 @@ const Home = (props: Props) => {
     const x = event.clientX - box.left
     const y = event.clientY - box.top
     const realPos = getCubePosition(x, y)
-    
+
     socket.emit('update_pixel', {
       x: realPos.x,
       y: realPos.y,
       color: color,
       code: getCookie('code')
     })
+    context.fillStyle = colorLookup[color]
+    context.fillRect(realPos.x * 10, realPos.y * 10, 10, 10)
+    setShowFollowingDot(false)
   }
 
   return (
@@ -145,7 +150,7 @@ const Home = (props: Props) => {
   
     { cooldown != 0 && <div className="cooldown">Cooldown: {prettyMilliseconds(cooldown, {verbose: true})}</div>}
     { (cooldown == 0 && loggedIn) &&
-          <><Colorcube color={color} colorlookup={colorLookup}></Colorcube>
+          <>{showFollowingDot && <Colorcube color={color} colorlookup={colorLookup}></Colorcube>}
           <Colorpalette palette={colorLookup} changeColor={setColor}></Colorpalette></>
      }
     {!loggedIn &&

@@ -24,8 +24,9 @@ a {
   z-index: -1;
   margin: 0;
   position: absolute;
-  top: 0;
-  left: 0;
+  top: 50%;
+  left: 50%;
+  transform: translate(-30%, -45%);
 }
 
 .border { 
@@ -116,8 +117,11 @@ a {
 }
 
 .cooldown {
+  -webkit-box-shadow: 0px 0px 9px 0px rgba(66, 68, 90, 1);
+  -moz-box-shadow: 0px 0px 9px 0px rgba(66, 68, 90, 1);
+  box-shadow: 0px 0px 9px 0px rgba(66, 68, 90, 1);  
   position: fixed;
-  background: #c04000;
+  background: #CED3DC;
   left: 50%;
   bottom: 20px;
   padding: 20px 20px;

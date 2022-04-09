@@ -1,3 +1,4 @@
+import { useRouter } from "next/router";
 import { useEffect } from "react";
 
 type Props = {
@@ -6,9 +7,12 @@ type Props = {
 }
 
 export default function Colorpalette(props: Props) {
-    const palette = props.palette
+    const palette = props.palette || []
     const changeColor = props.changeColor
-  
+    const router = useRouter()
+    if(router.isFallback) {
+        return <div>Loading...</div>
+    }
 
 
     return (
