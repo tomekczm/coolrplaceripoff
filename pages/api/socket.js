@@ -4,17 +4,14 @@ import { Server } from 'socket.io'
 import prettyMilliseconds from 'pretty-ms'
 import { parse } from 'cookie'
 import { env } from 'process'
+import * as colorLookup from '../../public/colorlookup.json'
 
 const xSize = 100
 const ySize = 100
 const sockets = new Map()
-let colorAmount = 0
+let colorAmount = colorLookup.length
 const cooldowns = new Map()
 let pixels =  []
-
-fetch('http://localhost:3000/colorLookup.json').then(res => res.json()).then(json => {
-  colorAmount = json.colors.length
-})
 
 async function fetchWithTimeout(resource, options = {}) {
   const { timeout = 8000 } = options;
@@ -100,7 +97,9 @@ export default async function handler(
             if(data.x > 99 || data.y > 99) return
             if(data.color > colorAmount) return
             if(data.color < 0) return
+            const endTime = +Date.now() + 15 * 60 * 1000
             const code = data.code
+            socket.emit('cooldown_time', endTime)
             // Verify code
 
             const query = await prisma.user.findFirst({
@@ -119,12 +118,10 @@ export default async function handler(
               }
               if(cooldown.isOnCooldown) return
             }
-            const endTime = +Date.now() + 15 * 60 * 1000
             cooldowns.set(code, {
               time: endTime,
               isOnCooldown: true
             })
-            socket.emit('cooldown_time', endTime)
 
             setTimeout(() => {
               cooldowns.set(code, {

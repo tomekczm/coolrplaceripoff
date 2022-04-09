@@ -12,6 +12,7 @@ import { getCookie } from 'cookies-next'
 import Loginbutton from './loginbutton'
 import LoginModal from './LoginModal'
 import prettyMilliseconds from 'pretty-ms'
+import * as colorLookup from '../public/colorlookup.json'
 
 const xSize = 100
 const ySize = 100
@@ -23,7 +24,6 @@ export async function getServerSideProps(context: Context) {
   const login = context.req.cookies.code
   const isLoggedIn = login !== undefined
 
-  const colorLookup = await (await fetch('http://localhost:3000/colorLookup.json')).json()
   return {
     props: {
       colorLookup: colorLookup.colors,
