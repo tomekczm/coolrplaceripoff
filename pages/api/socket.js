@@ -12,6 +12,7 @@ const sockets = new Map()
 let colorAmount = colorLookup.length
 const cooldowns = new Map()
 let pixels =  []
+const usermap = new Map()
 
 async function fetchWithTimeout(resource, options = {}) {
   const { timeout = 8000 } = options;
@@ -82,7 +83,11 @@ export default async function handler(
         sockets.set(io, 0)
 
         io.on('connection', socket => {
-          socket.emit('init_packet', pixels)
+          const usermapJson = {}
+          for(const [key, value] of usermap.entries()) {
+            usermapJson[key] = value
+          }
+          socket.emit('init_packet', { pixels: pixels, users: usermapJson })
           const cookieHeader = socket.client.request.headers.cookie
           if(cookieHeader) {
           const cookies = parse(socket.client.request.headers.cookie)
@@ -133,8 +138,10 @@ export default async function handler(
               })
             }, 15 * 60 * 1000);
             
-            console.log("set")
             pixels[data.y][data.x] = data.color
+            data.name = query.name
+            const indexName = JSON.stringify({x: data.x, y: data.y})
+            usermap.set(indexName, data.name)
             socket.broadcast.emit('update_pixel', data)
           })
         })

@@ -1,18 +1,19 @@
 import type { GetServerSidePropsContext, NextPage, PreviewData } from 'next'
 import Head from 'next/head'
 import Image from 'next/image'
-import { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import styles from '../styles/Home.module.css'
 import Colorpalette from './colorpalette'
 import io, { Socket } from 'socket.io-client'
 import { DefaultEventsMap } from '@socket.io/component-emitter'
-import Colorcube from './colorcube'
+import { Colorcube } from './colorcube'
 import { ParsedUrlQuery } from 'querystring'
 import { getCookie } from 'cookies-next'
 import Loginbutton from './loginbutton'
 import LoginModal from './LoginModal'
 import prettyMilliseconds from 'pretty-ms'
 import * as colorLookup from '../public/colorlookup.json'
+import Tooltip from './tooltip'
 
 const xSize = 100
 const ySize = 100
@@ -32,11 +33,18 @@ export async function getServerSideProps(context: Context) {
   }
 }
 
+type UserMapRevied = {
+  [key: string]: string
+}
+
+export type Point = { x: number, y: number }
+
 type Props = {
   pixels: Array<number>,
   colorLookup: Array<string>,
   isLoggedIn: boolean
 }
+
 
 export function getCubePosition(x: number, y: number) {
   const xAmount = Math.floor(x / 10)
@@ -47,22 +55,56 @@ export function getCubePosition(x: number, y: number) {
   }
 }
 
+function componentToHex(c: number) {
+  var hex = c.toString(16);
+  return hex.length == 1 ? "0" + hex : hex;
+}
+
+function rgbToHex(r: number, g: number, b: number) {
+  return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
+}
+
 const Home = (props: Props) => {
+  const usermap = new Map<string, string>()
   const [loginPrompt, setLoginPrompt] = useState(false)
+  const [showTooltip, setShowTooltip] = useState(false)
+  const [isMouseOverCanvas, setIsMouseOverCanvas] = useState(false)
+  const [tooltipText, setTooltipText] = useState('')
   const colorLookup = props.colorLookup
-  const canvasRef = useRef(null)
+  const canvasRef = useRef<HTMLCanvasElement>(null)
   const [color, setColor] = useState(0)
+  const [pointerColor, setPointerColor] = useState('')
   const [cooldown, setCooldown] = useState(0)
-  const [showFollowingDot, setShowFollowingDot] = useState(true)
+  const [fillFollowingDot, setFillFollowingDot] = useState(true)
   const loggedIn = props.isLoggedIn
+  const [point, setPoint] = useState<Point>({ x: 0, y: 0 })
+  function whenStedy(event: MouseEvent) {
+    const canvas = canvasRef.current as unknown as HTMLCanvasElement
+    const context = canvas.getContext('2d') as CanvasRenderingContext2D
+    const box = canvas.getBoundingClientRect();
+    const x = event.clientX - box.left
+    const y = event.clientY - box.top
+    const realPos = getCubePosition(x, y)
+    try {
+      const nickname = usermap.get(JSON.stringify(realPos))
+      if (nickname) {
+        setShowTooltip(true)
+        setTooltipText(nickname || 'Joe Biden')
+      }
+    }catch (e) {
+      console.log(e)
+    }
+  }
+  let stedyTimeout: number | undefined = undefined
 
   function updateTimer(endTime: number) {
     const now = +Date.now()
     const timeLeft = endTime - now
     const withoutMs = timeLeft - (timeLeft % 1000)    
+    setFillFollowingDot(false)
     if(timeLeft < 0) {
       setCooldown(0)
-      setShowFollowingDot(true)
+      setFillFollowingDot(true)
     }else {
       setCooldown(withoutMs)
       setTimeout(() => updateTimer(endTime), 1000)
@@ -83,7 +125,20 @@ const Home = (props: Props) => {
       })
   
       socket.on('init_packet', (data) => {
-        draw(data)
+        console.log(data)
+        draw(data.pixels)
+        const userMapRecived = data.users
+        console.log(userMapRecived)
+        try {
+          const json = userMapRecived
+          for (const [key, value] of Object.entries(json)) {
+            if(typeof value !== 'string') continue
+            usermap.set(key, value)
+          }
+        }catch(err) {
+          console.error(err)
+        }
+
       })
 
       socket.on('cooldown_time', (data) => {
@@ -96,8 +151,12 @@ const Home = (props: Props) => {
         const context = canvas.getContext('2d') as CanvasRenderingContext2D
         context.fillStyle = colorLookup[data.color]
         context.fillRect(data.x * 10, data.y * 10, 10, 10);
+        usermap.set(JSON.stringify({x: data.x, y: data.y}), data.name)
       })
-      
+
+      document.addEventListener('click', (e) => {
+        //whenStedy(e)
+      })
     }
     socketInitializer()
   }, [])
@@ -139,17 +198,46 @@ const Home = (props: Props) => {
     })
     context.fillStyle = colorLookup[color]
     context.fillRect(realPos.x * 10, realPos.y * 10, 10, 10)
-    setShowFollowingDot(false)
+    setFillFollowingDot(false)
+  }
+
+  function onMouseOver(event: React.MouseEvent) {
+    setIsMouseOverCanvas(true)
+  }
+  function onMouseOut(event: React.MouseEvent) {
+    setIsMouseOverCanvas(false)
+  }
+
+  function onMouseMove(e: React.MouseEvent) {
+    const canvas = canvasRef.current as unknown as HTMLCanvasElement
+    const context = canvas.getContext('2d') as CanvasRenderingContext2D
+    const box = canvas.getBoundingClientRect();
+    const x = e.clientX - box.left
+    const y = e.clientY - box.top
+    const realPos = getCubePosition(x, y)
+    
+    const data = context.getImageData(realPos.x * 10, realPos.y * 10, 10, 10).data
+    if(data[4] == 0) {
+      setIsMouseOverCanvas(false)
+    } else {
+      setIsMouseOverCanvas(true)
+    }
+
+    setPoint({ x: realPos.x, y: realPos.y })
+    if(cooldown != 0) {
+      const hex = rgbToHex(data[0], data[1], data[2])
+      setPointerColor(hex)
+    }
   }
 
   return (
     <>
-    <canvas ref={canvasRef} className="canvas" onClick={onclick}>
+    <canvas ref={canvasRef} className="canvas" onClick={onclick} onMouseMove={onMouseMove} onMouseLeave={onMouseOut} onMouseOver={onMouseOver}>
     </canvas>
-  
+    { isMouseOverCanvas && <Colorcube color={color} colorlookup={colorLookup} position={point} pointercolor={pointerColor} isOnDelay={cooldown}></Colorcube> }
     { cooldown != 0 && <div className="cooldown">Cooldown: {prettyMilliseconds(cooldown, {verbose: true})}</div>}
     { (cooldown == 0 && loggedIn) &&
-          <>{showFollowingDot && <Colorcube color={color} colorlookup={colorLookup}></Colorcube>}
+          <>
           <Colorpalette palette={colorLookup} changeColor={setColor}></Colorpalette></>
      }
     {!loggedIn &&
