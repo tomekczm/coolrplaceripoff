@@ -83,13 +83,16 @@ export default async function handler(
 
         io.on('connection', socket => {
           socket.emit('init_packet', pixels)
+          const cookieHeader = socket.client.request.headers.cookie
+          if(cookieHeader) {
           const cookies = parse(socket.client.request.headers.cookie)
-          if(cookies && cookies.code) {
-            const code = cookies.code
-            const cooldown = cooldowns.get(code)
-            if(cooldown) {
-              if(cooldown.time >= +Date.now()) {
-                socket.emit('cooldown_time', cooldown.time)
+            if(cookies && cookies.code) {
+              const code = cookies.code
+              const cooldown = cooldowns.get(code)
+              if(cooldown) {
+                if(cooldown.time >= +Date.now()) {
+                  socket.emit('cooldown_time', cooldown.time)
+                }
               }
             }
           }
