@@ -122,9 +122,9 @@ a {
 }
 
 .cooldown {
-  -webkit-box-shadow: 0px 0px 9px 0px rgba(66, 68, 90, 1);
-  -moz-box-shadow: 0px 0px 9px 0px rgba(66, 68, 90, 1);
-  box-shadow: 0px 0px 9px 0px rgba(66, 68, 90, 1);  
+  -webkit-box-shadow: 0px 0px 19px -4px rgba(66, 68, 90, 1);
+  -moz-box-shadow: 0px 0px 19px -4px rgba(66, 68, 90, 1);
+  box-shadow: 0px 0px 19px -4px rgba(66, 68, 90, 1);
   position: fixed;
   background: #CED3DC;
   left: 50%;
@@ -144,4 +144,50 @@ a {
   font-size: 10px;
   padding: 0px 10px;
   border-radius: 10px;
+}
+
+.floated {
+  
+  font-size: 30px;
+  -webkit-box-shadow: 0px 0px 19px -4px rgba(66, 68, 90, 1);
+  -moz-box-shadow: 0px 0px 19px -4px rgba(66, 68, 90, 1);
+  box-shadow: 0px 0px 19px -4px rgba(66, 68, 90, 1);
+  float:left;
+  margin-right:20px;
+  padding: 40px 110px;
+  border-radius: 10px;
+  border-style: none;
+}
+
+.PlaceButton {
+  background-color: #ff9800;
+}
+
+.NicknameButton {
+  background-color: #f5f5f5;
+}
+
+.ActionHolder {
+  z-index: 7;
+  position: fixed;
+  left: 50%;
+  bottom: 20px;
+  padding: 20px 20px;
+  border-radius: 10px;
+  transform: translate(-50%, -110%);
+  margin: 0 auto;
+}
+
+.PlayAnimationAppear {
+  animation: Appear 1s;
+}
+
+@keyframes Appear {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%);
+  }
+  100% {
+    transform: translate(-50%, -110%);
+  }
 }

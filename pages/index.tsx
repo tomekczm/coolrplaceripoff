@@ -14,6 +14,7 @@ import LoginModal from './LoginModal'
 import prettyMilliseconds from 'pretty-ms'
 import * as colorLookup from '../public/colorlookup.json'
 import Tooltip from './tooltip'
+import ConfirmBox from './confirmbox'
 
 const xSize = 100
 const ySize = 100
@@ -65,7 +66,7 @@ function rgbToHex(r: number, g: number, b: number) {
 }
 
 const Home = (props: Props) => {
-  const usermap = new Map<string, string>()
+  const [usermap, setUserMap] = useState<UserMapRevied>({})
   const [loginPrompt, setLoginPrompt] = useState(false)
   const [showTooltip, setShowTooltip] = useState(false)
   const [isMouseOverCanvas, setIsMouseOverCanvas] = useState(false)
@@ -78,23 +79,18 @@ const Home = (props: Props) => {
   const [fillFollowingDot, setFillFollowingDot] = useState(true)
   const loggedIn = props.isLoggedIn
   const [point, setPoint] = useState<Point>({ x: 0, y: 0 })
-  function whenStedy(event: MouseEvent) {
-    const canvas = canvasRef.current as unknown as HTMLCanvasElement
-    const context = canvas.getContext('2d') as CanvasRenderingContext2D
-    const box = canvas.getBoundingClientRect();
-    const x = event.clientX - box.left
-    const y = event.clientY - box.top
-    const realPos = getCubePosition(x, y)
-    try {
-      const nickname = usermap.get(JSON.stringify(realPos))
-      if (nickname) {
-        setShowTooltip(true)
-        setTooltipText(nickname || 'Joe Biden')
-      }
-    }catch (e) {
-      console.log(e)
-    }
+
+  function _setusermap(key: string, value: string) {
+    setUserMap({
+      ...usermap,
+      [key]: value
+    })
   }
+
+  function getUsermap(key: string) {
+    return usermap[key]
+  }
+
   let stedyTimeout: number | undefined = undefined
 
   function updateTimer(endTime: number) {
@@ -133,7 +129,7 @@ const Home = (props: Props) => {
           const json = userMapRecived
           for (const [key, value] of Object.entries(json)) {
             if(typeof value !== 'string') continue
-            usermap.set(key, value)
+            _setusermap(key, value)
           }
         }catch(err) {
           console.error(err)
@@ -151,7 +147,8 @@ const Home = (props: Props) => {
         const context = canvas.getContext('2d') as CanvasRenderingContext2D
         context.fillStyle = colorLookup[data.color]
         context.fillRect(data.x * 10, data.y * 10, 10, 10);
-        usermap.set(JSON.stringify({x: data.x, y: data.y}), data.name)
+        const key = JSON.stringify({x: data.x, y: data.y})
+        _setusermap(key, data.name)
       })
 
       document.addEventListener('click', (e) => {
@@ -216,6 +213,13 @@ const Home = (props: Props) => {
     const y = e.clientY - box.top
     const realPos = getCubePosition(x, y)
     
+    const nickname = getUsermap(JSON.stringify(realPos))
+
+    if(nickname)
+      setTooltipText(nickname || 'Joe Biden')
+    else
+      setTooltipText('')
+
     const data = context.getImageData(realPos.x * 10, realPos.y * 10, 10, 10).data
     if(data[4] == 0) {
       setIsMouseOverCanvas(false)
@@ -224,17 +228,19 @@ const Home = (props: Props) => {
     }
 
     setPoint({ x: realPos.x, y: realPos.y })
-    if(cooldown != 0) {
+    if(cooldown != 0 || !loggedIn) {
       const hex = rgbToHex(data[0], data[1], data[2])
       setPointerColor(hex)
     }
   }
+  const fillCube = cooldown == 0 || loggedIn
 
   return (
     <>
+    { tooltipText != '' && <ConfirmBox name={tooltipText}></ConfirmBox>}
     <canvas ref={canvasRef} className="canvas" onClick={onclick} onMouseMove={onMouseMove} onMouseLeave={onMouseOut} onMouseOver={onMouseOver}>
     </canvas>
-    { isMouseOverCanvas && <Colorcube color={color} colorlookup={colorLookup} position={point} pointercolor={pointerColor} isOnDelay={cooldown}></Colorcube> }
+    { isMouseOverCanvas && <Colorcube color={color} colorlookup={colorLookup} position={point} pointercolor={pointerColor} isOnDelay={cooldown} loggedIn={loggedIn}></Colorcube> }
     { cooldown != 0 && <div className="cooldown">Cooldown: {prettyMilliseconds(cooldown, {verbose: true})}</div>}
     { (cooldown == 0 && loggedIn) &&
           <>

@@ -44,7 +44,7 @@ export default function Colorcube(props: { color: number, colorlookup: string[],
   }
   */
 
-  export const Colorcube = (props: { color: number, colorlookup: string[], position: Point, pointercolor: string, isOnDelay: number }) => {
+  export const Colorcube = (props: { color: number, colorlookup: string[], position: Point, pointercolor: string, isOnDelay: number, loggedIn: boolean }) => {
     const canvasRef = useRef(null)
     
   
@@ -67,7 +67,7 @@ export default function Colorcube(props: { color: number, colorlookup: string[],
 
     useEffect(() => {
         draw()
-        const isOnDelay = props.isOnDelay != 0
+        const isOnDelay = props.isOnDelay != 0 || !props.loggedIn
         const realPos = props.position
         const canvas = canvasRef.current as unknown as HTMLCanvasElement
         const context = canvas.getContext('2d') as CanvasRenderingContext2D
@@ -76,7 +76,7 @@ export default function Colorcube(props: { color: number, colorlookup: string[],
         else
             context.fillStyle = props.pointercolor
         context.fillRect(realPos.x * 10, realPos.y * 10, 10, 10)
-    }, [props.color, props.isOnDelay, props.pointercolor, props.position])
+    }, [props.color, props.isOnDelay, props.loggedIn, props.pointercolor, props.position])
 
     return (
       <canvas ref={canvasRef} className="canvas ignorepoints"></canvas>
