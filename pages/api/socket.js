@@ -1,6 +1,6 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import { prisma } from './login'
-import { Server } from 'Socket.IO'
+import { Server } from 'socket.io'
 import prettyMilliseconds from 'pretty-ms'
 import { parse } from 'cookie'
 import { env } from 'process'
