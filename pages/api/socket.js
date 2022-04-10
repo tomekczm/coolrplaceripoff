@@ -14,17 +14,21 @@ const cooldowns = new Map()
 let pixels =  []
 const usermap = new Map()
 
+async function promiseTimeout(_timeout) {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      resolve(null)
+    }, _timeout)
+  })
+}
+
 async function fetchWithTimeout(resource, options = {}) {
-  const { timeout = 8000 } = options;
-  
-  const controller = new AbortController();
-  const id = setTimeout(() => controller.abort(), timeout);
-  const response = await fetch(resource, {
-    ...options,
-    signal: controller.signal  
-  });
-  clearTimeout(id);
-  return response;
+  try {
+    const response = fetch(resource, options);
+    return await Promise.race(response, promiseTimeout(60000))
+  } catch {
+    return null
+  }
 }
 
 for (let i = 0; i < xSize; i++) {
@@ -38,6 +42,10 @@ async function getLatestbackup() {
   try {
     const backupServer = process.env.BACKUP_SERVER
     const fetchRes = await fetchWithTimeout(`${backupServer}/backup`)
+    if(!fetchRes) {
+      console.log('No backup found (epic fail)')
+      return
+    }
     const json = await fetchRes.json()
     if(json.pixels) {
       pixels = json.pixels
