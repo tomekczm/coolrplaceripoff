@@ -41,7 +41,7 @@ for (let i = 0; i < xSize; i++) {
 async function getLatestbackup() {
   try {
     const backupServer = process.env.BACKUP_SERVER
-    const fetchRes = await fetchWithTimeout(`${backupServer}/backup`)
+    const fetchRes = await fetch(`${backupServer}/backup`)
     if(!fetchRes) {
       console.log('No backup found (epic fail)')
       return
@@ -53,13 +53,13 @@ async function getLatestbackup() {
   } catch (err) {
     console.log(err)
   }
-  createBackup()
 }
 
 async function createBackup() {
+  console.log('Creating backup')
   try {
     const backupServer = process.env.BACKUP_SERVER
-    const fetchRes = await fetchWithTimeout(`${backupServer}/createbackup`, {
+    const fetchRes = await fetch(`${backupServer}/createbackup`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -75,8 +75,11 @@ async function createBackup() {
     console.log(err)
   }
 }
-getLatestbackup()
 
+(async () => {
+  await getLatestbackup().catch(console.error)
+  createBackup().catch(console.error)
+})()
 
 export default async function handler(
   req,
