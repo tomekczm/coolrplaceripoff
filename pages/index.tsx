@@ -6,7 +6,7 @@ import styles from '../styles/Home.module.css'
 import Colorpalette from './colorpalette'
 import io, { Socket } from 'socket.io-client'
 import { DefaultEventsMap } from '@socket.io/component-emitter'
-import { Colorcube } from './colorcube'
+import Colorcube from './colorcube'
 import { ParsedUrlQuery } from 'querystring'
 import { getCookie } from 'cookies-next'
 import Loginbutton from './loginbutton'
@@ -66,7 +66,7 @@ function rgbToHex(r: number, g: number, b: number) {
 }
 
 const Home = (props: Props) => {
-  const [usermap, setUserMap] = useState<UserMapRevied>({})
+  const [blockPlacers, setBlockPlacer] = useState<UserMapRevied>({})
   const [loginPrompt, setLoginPrompt] = useState(false)
   const [showTooltip, setShowTooltip] = useState(false)
   const [isMouseOverCanvas, setIsMouseOverCanvas] = useState(false)
@@ -80,15 +80,9 @@ const Home = (props: Props) => {
   const loggedIn = props.isLoggedIn
   const [point, setPoint] = useState<Point>({ x: 0, y: 0 })
 
-  function _setusermap(key: string, value: string) {
-    setUserMap({
-      ...usermap,
-      [key]: value
-    })
-  }
 
-  function getUsermap(key: string) {
-    return usermap[key]
+  function getPlacerAt(key: string) {
+    return blockPlacers[key]
   }
 
   let stedyTimeout: number | undefined = undefined
@@ -121,15 +115,15 @@ const Home = (props: Props) => {
       })
   
       socket.on('init_packet', (data) => {
-        console.log(data)
+        //console.log(data)
         draw(data.pixels)
         const userMapRecived = data.users
-        console.log(userMapRecived)
+        //console.log(userMapRecived)
         try {
           const json = userMapRecived
           for (const [key, value] of Object.entries(json)) {
             if(typeof value !== 'string') continue
-            _setusermap(key, value)
+            setBlockPlacer(d => ({...d, [key]: value}))
           }
         }catch(err) {
           console.error(err)
@@ -148,7 +142,7 @@ const Home = (props: Props) => {
         context.fillStyle = colorLookup[data.color]
         context.fillRect(data.x * 10, data.y * 10, 10, 10);
         const key = JSON.stringify({x: data.x, y: data.y})
-        _setusermap(key, data.name)
+        setBlockPlacer(d => ({...d, [key]: data.name}))
       })
 
       document.addEventListener('click', (e) => {
@@ -213,7 +207,7 @@ const Home = (props: Props) => {
     const y = e.clientY - box.top
     const realPos = getCubePosition(x, y)
     
-    const nickname = getUsermap(JSON.stringify(realPos))
+    const nickname = blockPlacers[JSON.stringify(realPos)]
 
     if(nickname)
       setTooltipText(nickname || 'Joe Biden')

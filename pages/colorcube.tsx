@@ -44,7 +44,7 @@ export default function Colorcube(props: { color: number, colorlookup: string[],
   }
   */
 
-  export const Colorcube = (props: { color: number, colorlookup: string[], position: Point, pointercolor: string, isOnDelay: number, loggedIn: boolean }) => {
+  export default function Colorcube(props: { color: number, colorlookup: string[], position: Point, pointercolor: string, isOnDelay: number, loggedIn: boolean }) {
     const canvasRef = useRef(null)
     
   
